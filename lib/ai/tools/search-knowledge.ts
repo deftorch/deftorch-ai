@@ -7,13 +7,13 @@ import { sql } from "drizzle-orm";
 
 export const searchKnowledgeBase = tool({
   description: "Cari dokumen, artikel, file, atau pengetahuan spesifik dari memori / database RAG. Gunakan tool ini jika pengguna menanyakan tentang dokumen yang pernah mereka upload sebelumnya.",
-  parameters: z.object({
+  inputSchema: z.object({
     query: z.string().describe("Pertanyaan spesifik atau kata kunci untuk dicari di database"),
   }),
-  execute: async ({ query }) => {
+  execute: async (input) => {
     try {
       // 1. Ubah query menjadi vektor
-      const queryVector = await generateQueryEmbedding(query);
+      const queryVector = await generateQueryEmbedding(input.query);
       
       // 2. Format vektor ke string array untuk PostgreSQL
       const vectorString = `[${queryVector.join(",")}]`;
