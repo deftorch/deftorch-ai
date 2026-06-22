@@ -13,7 +13,8 @@ export async function GET() {
 
   const mergedCapabilities = {
     ...capabilities,
-    ...Object.fromEntries(geminiModels.map((m) => [m.id, m.capabilities])),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ...Object.fromEntries(geminiModels.map((m: any) => [m.id, m.capabilities])),
   };
 
   return Response.json(
