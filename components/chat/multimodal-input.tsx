@@ -310,7 +310,6 @@ function PureMultimodalInput({
         setUploadQueue([]);
       }
     },
-    },
     [setAttachments, uploadFile]
   );
 
