@@ -1,30 +1,23 @@
-import { getAllGatewayModels, getCapabilities, isDemo } from "@/lib/ai/models";
+import { getCapabilities } from "@/lib/ai/models";
 import { fetchGeminiModels } from "@/lib/ai/gemini";
 
 export async function GET() {
   const headers = {
-    "Cache-Control": "public, max-age=86400, s-maxage=86400",
+    "Cache-Control": "public, max-age=3600, s-maxage=3600",
   };
 
-  const curatedCapabilities = await getCapabilities();
-  const geminiModels = await fetchGeminiModels();
+  const [geminiModels, capabilities] = await Promise.all([
+    fetchGeminiModels(),
+    getCapabilities(),
+  ]);
 
-  if (isDemo) {
-    const gatewayModels = await getAllGatewayModels();
-    const models = [...gatewayModels, ...geminiModels];
-    const capabilities = Object.fromEntries(
-      models.map((m) => [m.id, curatedCapabilities[m.id] ?? m.capabilities])
-    );
+  const mergedCapabilities = {
+    ...capabilities,
+    ...Object.fromEntries(geminiModels.map((m) => [m.id, m.capabilities])),
+  };
 
-    return Response.json({ capabilities, models }, { headers });
-  }
-
-  // If not demo, we still want to expose gemini models and their capabilities
-  const gatewayModels = await getAllGatewayModels();
-  const models = [...gatewayModels, ...geminiModels];
-  const capabilities = Object.fromEntries(
-    models.map((m) => [m.id, curatedCapabilities[m.id] ?? m.capabilities])
+  return Response.json(
+    { capabilities: mergedCapabilities, models: geminiModels },
+    { headers }
   );
-
-  return Response.json({ capabilities, models }, { headers });
 }

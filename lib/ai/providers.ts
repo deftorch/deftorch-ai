@@ -1,6 +1,11 @@
-import { customProvider, gateway } from "ai";
+// lib/ai/providers.ts
+// Updated: 22 Juni 2026
+// PERUBAHAN: getTitleModel() diperbarui dari gemini-2.5-flash → gemini-3.5-flash
+//             untuk menghindari dampak shutdown gemini-2.5-flash pada 16 Oktober 2026.
+
+import { customProvider } from "ai";
 import { isTestEnvironment } from "../constants";
-import { titleModel } from "./models";
+import { getAutoRotateGeminiModel } from "./gemini";
 
 export const myProvider = isTestEnvironment
   ? (() => {
@@ -14,23 +19,18 @@ export const myProvider = isTestEnvironment
     })()
   : null;
 
-import { getAutoRotateGeminiModel } from "./gemini";
-
 export function getLanguageModel(modelId: string) {
   if (isTestEnvironment && myProvider) {
     return myProvider.languageModel(modelId);
   }
 
-  if (modelId.startsWith("google/")) {
-    return getAutoRotateGeminiModel(modelId);
-  }
-
-  return gateway.languageModel(modelId);
+  return getAutoRotateGeminiModel(modelId);
 }
 
 export function getTitleModel() {
   if (isTestEnvironment && myProvider) {
     return myProvider.languageModel("title-model");
   }
-  return gateway.languageModel(titleModel.id);
+  // Diperbarui dari gemini-2.5-flash (shutdown 16 Okt 2026) → gemini-3.5-flash (Stable, no EOL)
+  return getAutoRotateGeminiModel("google/gemini-3.5-flash");
 }

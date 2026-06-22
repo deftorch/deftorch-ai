@@ -1,0 +1,267 @@
+
+<h2 class="sr-only">Analisis testing proyek deftorch-ai-gemini: struktur, temuan, dan celah cakupan</h2>
+
+<style>
+  body { margin: 0; }
+  .section { margin-bottom: 2rem; }
+  .section-title { font-size: 13px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: .06em; margin: 0 0 10px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .metric { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px 14px; }
+  .metric-val { font-size: 26px; font-weight: 500; color: var(--color-text-primary); margin: 0; }
+  .metric-label { font-size: 12px; color: var(--color-text-secondary); margin: 2px 0 0; }
+  .card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 14px 16px; }
+  .tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: var(--border-radius-md); font-weight: 500; }
+  .tag-ok { background: var(--color-background-success); color: var(--color-text-success); }
+  .tag-warn { background: var(--color-background-warning); color: var(--color-text-warning); }
+  .tag-err { background: var(--color-background-danger); color: var(--color-text-danger); }
+  .tag-info { background: var(--color-background-info); color: var(--color-text-info); }
+  .file-row { display: flex; align-items: baseline; justify-content: space-between; padding: 7px 0; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 13px; }
+  .file-row:last-child { border-bottom: none; }
+  .file-name { font-family: var(--font-mono); font-size: 12px; color: var(--color-text-primary); }
+  .file-meta { color: var(--color-text-secondary); font-size: 12px; }
+  .issue-row { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .issue-row:last-child { border-bottom: none; }
+  .issue-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 2px; }
+  .issue-desc { font-size: 12px; color: var(--color-text-secondary); line-height: 1.5; }
+  .bar-row { display: flex; align-items: center; gap: 10px; margin: 6px 0; font-size: 12px; }
+  .bar-label { width: 110px; color: var(--color-text-secondary); flex-shrink: 0; text-align: right; }
+  .bar-track { flex: 1; background: var(--color-background-secondary); border-radius: 4px; height: 10px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; }
+  .bar-count { width: 28px; text-align: right; color: var(--color-text-secondary); }
+  .ci-step { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 5px 0; }
+  .ci-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .gap-item { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 12px; color: var(--color-text-secondary); }
+</style>
+
+<div style="padding: 1rem 0 0;">
+
+  <div class="section grid-3">
+    <div class="metric">
+      <p class="metric-val">23</p>
+      <p class="metric-label">Total test cases (E2E)</p>
+    </div>
+    <div class="metric">
+      <p class="metric-val" style="color: var(--color-text-warning);">0</p>
+      <p class="metric-label">Unit / integration tests</p>
+    </div>
+    <div class="metric">
+      <p class="metric-val">4</p>
+      <p class="metric-label">Test file (semua E2E)</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <p class="section-title">File testing</p>
+    <div class="card">
+      <div class="file-row">
+        <span class="file-name">tests/e2e/auth.test.ts</span>
+        <span class="file-meta">4 tests &nbsp;<span class="tag tag-ok">E2E</span></span>
+      </div>
+      <div class="file-row">
+        <span class="file-name">tests/e2e/chat.test.ts</span>
+        <span class="file-meta">7 tests &nbsp;<span class="tag tag-ok">E2E</span></span>
+      </div>
+      <div class="file-row">
+        <span class="file-name">tests/e2e/api.test.ts</span>
+        <span class="file-meta">6 tests &nbsp;<span class="tag tag-ok">E2E</span></span>
+      </div>
+      <div class="file-row">
+        <span class="file-name">tests/e2e/model-selector.test.ts</span>
+        <span class="file-meta">6 tests &nbsp;<span class="tag tag-warn">⚠ model mismatch</span></span>
+      </div>
+      <div class="file-row">
+        <span class="file-name">lib/ai/models.test.ts</span>
+        <span class="file-meta">0 tests &nbsp;<span class="tag tag-err">bukan test file</span></span>
+      </div>
+      <div class="file-row">
+        <span class="file-name">lib/ai/models.mock.ts</span>
+        <span class="file-meta">&nbsp;<span class="tag tag-info">mock model factories</span></span>
+      </div>
+      <div class="file-row">
+        <span class="file-name">tests/fixtures.ts &amp; pages/chat.ts</span>
+        <span class="file-meta">&nbsp;<span class="tag tag-warn">⚠ didefinisikan, tidak dipakai</span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <p class="section-title">Distribusi test per area</p>
+    <div class="card">
+      <div class="bar-row">
+        <span class="bar-label">Chat UI</span>
+        <div class="bar-track"><div class="bar-fill" style="width:100%; background:#534AB7;"></div></div>
+        <span class="bar-count">7</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">Model selector</span>
+        <div class="bar-track"><div class="bar-fill" style="width:86%; background:#534AB7;"></div></div>
+        <span class="bar-count">6</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">API integration</span>
+        <div class="bar-track"><div class="bar-fill" style="width:86%; background:#534AB7;"></div></div>
+        <span class="bar-count">6</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">Auth pages</span>
+        <div class="bar-track"><div class="bar-fill" style="width:57%; background:#534AB7;"></div></div>
+        <span class="bar-count">4</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">DB queries</span>
+        <div class="bar-track"><div class="bar-fill" style="width:0%; background:#E24B4A;"></div></div>
+        <span class="bar-count" style="color:var(--color-text-danger);">0</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">AI tools / RAG</span>
+        <div class="bar-track"><div class="bar-fill" style="width:0%; background:#E24B4A;"></div></div>
+        <span class="bar-count" style="color:var(--color-text-danger);">0</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">Editor logic</span>
+        <div class="bar-track"><div class="bar-fill" style="width:0%; background:#E24B4A;"></div></div>
+        <span class="bar-count" style="color:var(--color-text-danger);">0</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section grid-2">
+    <div>
+      <p class="section-title">CI Pipeline (playwright.yml)</p>
+      <div class="card">
+        <div class="ci-step"><div class="ci-dot" style="background:#1D9E75;"></div><span>Checkout &amp; install pnpm</span></div>
+        <div class="ci-step"><div class="ci-dot" style="background:#1D9E75;"></div><span>Cache pnpm store</span></div>
+        <div class="ci-step"><div class="ci-dot" style="background:#1D9E75;"></div><span>Install Playwright (Chromium only)</span></div>
+        <div class="ci-step"><div class="ci-dot" style="background:#E24B4A;"></div><span style="color:var(--color-text-danger);">Tidak ada AI API key di env CI</span></div>
+        <div class="ci-step"><div class="ci-dot" style="background:#BA7517;"></div><span>Run E2E tests (2 workers)</span></div>
+        <div class="ci-step"><div class="ci-dot" style="background:#1D9E75;"></div><span>Upload HTML report artifact</span></div>
+        <div style="margin-top:8px; font-size:11px; color:var(--color-text-secondary);">Trigger: push/PR ke main &amp; master</div>
+      </div>
+    </div>
+    <div>
+      <p class="section-title">Konfigurasi Playwright</p>
+      <div class="card">
+        <div class="file-row">
+          <span class="file-meta">Browser</span>
+          <span class="tag tag-warn">Desktop Chrome saja</span>
+        </div>
+        <div class="file-row">
+          <span class="file-meta">Timeout</span>
+          <span class="tag tag-warn">240 detik (sangat tinggi)</span>
+        </div>
+        <div class="file-row">
+          <span class="file-meta">Retries</span>
+          <span class="tag tag-err">0 (bahkan di CI)</span>
+        </div>
+        <div class="file-row">
+          <span class="file-meta">Workers</span>
+          <span class="tag tag-info">2 (lokal &amp; CI)</span>
+        </div>
+        <div class="file-row">
+          <span class="file-meta">Reporter</span>
+          <span class="tag tag-ok">HTML</span>
+        </div>
+        <div class="file-row">
+          <span class="file-meta">Mobile viewport</span>
+          <span class="tag tag-err">dikomentari</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <p class="section-title">Temuan &amp; masalah utama</p>
+    <div class="card">
+
+      <div class="issue-row">
+        <span class="tag tag-err" style="flex-shrink:0;margin-top:2px;">KRITIS</span>
+        <div>
+          <p class="issue-title">model-selector.test.ts menguji model yang tidak ada</p>
+          <p class="issue-desc"><code>MODEL_BUTTON_REGEX = /Kimi|Codestral|Mistral|DeepSeek|GPT|Grok/i</code> — tapi <code>models.ts</code> hanya berisi Gemini 2.5/3.x. Test ini akan gagal di app nyata karena mencari "Mistral Small" dan grup "Moonshot" yang tidak terdaftar.</p>
+        </div>
+      </div>
+
+      <div class="issue-row">
+        <span class="tag tag-err" style="flex-shrink:0;margin-top:2px;">KRITIS</span>
+        <div>
+          <p class="issue-title">AI API key tidak ada di CI workflow</p>
+          <p class="issue-desc"><code>playwright.yml</code> hanya set <code>BETTER_AUTH_SECRET</code>, <code>POSTGRES_URL</code>, <code>BLOB_READ_WRITE_TOKEN</code>, <code>REDIS_URL</code>. Tidak ada <code>GOOGLE_GENERATIVE_AI_API_KEY</code>. Test di <code>api.test.ts</code> yang mengirim pesan dan menunggu respons AI akan gagal di CI.</p>
+        </div>
+      </div>
+
+      <div class="issue-row">
+        <span class="tag tag-warn" style="flex-shrink:0;margin-top:2px;">PERINGATAN</span>
+        <div>
+          <p class="issue-title">lib/ai/models.test.ts bukan file test</p>
+          <p class="issue-desc">File bernama <code>*.test.ts</code> tapi tidak ada satupun <code>test()</code> atau <code>describe()</code> di dalamnya — hanya ekspor mock model factory. Ini membingungkan dan berbeda dari <code>models.mock.ts</code> yang melakukan hal serupa dengan pendekatan berbeda (dua sistem mock yang redundan).</p>
+        </div>
+      </div>
+
+      <div class="issue-row">
+        <span class="tag tag-warn" style="flex-shrink:0;margin-top:2px;">PERINGATAN</span>
+        <div>
+          <p class="issue-title">Fixtures dan Page Object didefinisikan tapi tidak pernah dipakai</p>
+          <p class="issue-desc"><code>tests/fixtures.ts</code> mengekspor custom <code>test</code> dengan <code>chatPage</code> fixture, dan <code>tests/pages/chat.ts</code> mengimplementasikan <code>ChatPage</code> POM — tapi keempat file E2E mengimpor langsung dari <code>@playwright/test</code>, bukan dari fixtures. <code>helpers.ts</code> (<code>generateRandomTestUser</code>, <code>generateTestMessage</code>) juga tidak pernah diimpor di mana pun.</p>
+        </div>
+      </div>
+
+      <div class="issue-row">
+        <span class="tag tag-warn" style="flex-shrink:0;margin-top:2px;">PERINGATAN</span>
+        <div>
+          <p class="issue-title">Test flaky dengan catch kosong</p>
+          <p class="issue-desc">Di <code>chat.test.ts</code>: <code>await stopButton.click&#40;&#123;timeout:5000&#125;&#41;.catch&#40;&#40;&#41; =&gt; &#123;&#125;&#41;</code> — test selalu lulus tanpa memvalidasi apa pun. Komentar dalam kode: "Generation may have finished before we could click" mengakui ini adalah non-assertion.</p>
+        </div>
+      </div>
+
+      <div class="issue-row">
+        <span class="tag tag-warn" style="flex-shrink:0;margin-top:2px;">PERINGATAN</span>
+        <div>
+          <p class="issue-title">Konstanta duplikat</p>
+          <p class="issue-desc"><code>MODEL_BUTTON_REGEX</code> didefinisikan identik di dua file: <code>tests/e2e/model-selector.test.ts</code> dan <code>tests/pages/chat.ts</code>. Seharusnya diekspor dari satu tempat.</p>
+        </div>
+      </div>
+
+      <div class="issue-row">
+        <span class="tag tag-info" style="flex-shrink:0;margin-top:2px;">INFO</span>
+        <div>
+          <p class="issue-title">Timeout 240 detik terlalu tinggi, 0 retries terlalu rendah</p>
+          <p class="issue-desc">Kombinasi 240s timeout + 0 retries tidak ideal untuk E2E. Timeout besar mengindikasikan test lambat (kemungkinan karena hit API nyata). E2E test biasanya butuh retry 1–2x untuk mengatasi flakiness jaringan, terutama di CI.</p>
+        </div>
+      </div>
+
+      <div class="issue-row">
+        <span class="tag tag-info" style="flex-shrink:0;margin-top:2px;">INFO</span>
+        <div>
+          <p class="issue-title">Tidak ada unit test sama sekali</p>
+          <p class="issue-desc">Tidak ada Vitest atau Jest. Logika kritis seperti <code>lib/db/queries.ts</code>, <code>lib/ai/tools/</code>, <code>lib/ai/rag.ts</code>, <code>lib/editor/</code>, <code>lib/ai/gemini.ts</code>, dan server actions tidak dicakup sama sekali.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <p class="section-title">Rekomendasi prioritas</p>
+    <div class="grid-2">
+      <div class="card">
+        <p style="font-size:13px;font-weight:500;margin:0 0 8px;">Jangka pendek</p>
+        <div class="gap-item"><i class="ti ti-circle-check" aria-hidden="true"></i>Tambah AI API key ke GitHub secrets CI</div>
+        <div class="gap-item"><i class="ti ti-circle-check" aria-hidden="true"></i>Selaraskan model-selector test dengan model Gemini aktual</div>
+        <div class="gap-item"><i class="ti ti-circle-check" aria-hidden="true"></i>Ganti nama models.test.ts → models.mock-v2.ts atau gabungkan dengan models.mock.ts</div>
+        <div class="gap-item"><i class="ti ti-circle-check" aria-hidden="true"></i>Pakai fixtures/ChatPage di semua test E2E</div>
+        <div class="gap-item"><i class="ti ti-circle-check" aria-hidden="true"></i>Hapus catch kosong, ganti dengan assertion real</div>
+        <div class="gap-item"><i class="ti ti-circle-check" aria-hidden="true"></i>Ekstrak MODEL_BUTTON_REGEX ke satu file shared</div>
+      </div>
+      <div class="card">
+        <p style="font-size:13px;font-weight:500;margin:0 0 8px;">Jangka menengah</p>
+        <div class="gap-item"><i class="ti ti-circle-check" aria-hidden="true"></i>Tambah Vitest untuk unit test (lib/db, lib/ai/tools, lib/editor)</div>
+        <div class="gap-item"><i class="ti ti-circle-check" aria-hidden="true"></i>Turunkan timeout ke 60–90 detik, naikkan retries ke 1–2 di CI</div>
+        <div class="gap-item"><i class="ti ti-circle-check" aria-hidden="true"></i>Aktifkan Firefox/WebKit di playwright config</div>
+        <div class="gap-item"><i class="ti ti-circle-check" aria-hidden="true"></i>Mock AI responses di E2E agar tidak bergantung API key</div>
+        <div class="gap-item"><i class="ti ti-circle-check" aria-hidden="true"></i>Tambah test untuk mobile viewport</div>
+        <div class="gap-item"><i class="ti ti-circle-check" aria-hidden="true"></i>Test login flow end-to-end dengan user registration</div>
+      </div>
+    </div>
+  </div>
+</div>

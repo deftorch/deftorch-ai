@@ -13,10 +13,10 @@ import { createResumableStreamContext } from "resumable-stream";
 import { auth, type UserType } from "@/app/(auth)/auth";
 import { entitlementsByUserType } from "@/lib/ai/entitlements";
 import {
-  allowedModelIds,
   chatModels,
   DEFAULT_CHAT_MODEL,
   getCapabilities,
+  isAllowedModelId,
 } from "@/lib/ai/models";
 import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
 import { getLanguageModel } from "@/lib/ai/providers";
@@ -81,7 +81,7 @@ export async function POST(request: Request) {
       return new ChatbotError("unauthorized:chat").toResponse();
     }
 
-    const chatModel = allowedModelIds.has(selectedChatModel)
+    const chatModel = isAllowedModelId(selectedChatModel)
       ? selectedChatModel
       : DEFAULT_CHAT_MODEL;
 
@@ -209,12 +209,19 @@ export async function POST(request: Request) {
                   "searchKnowledgeBase",
                 ],
           providerOptions: {
-            ...(modelConfig?.gatewayOrder && {
-              gateway: { order: modelConfig.gatewayOrder },
-            }),
-            ...(modelConfig?.reasoningEffort && {
-              openai: { reasoningEffort: modelConfig.reasoningEffort },
-            }),
+            ...(modelConfig?.reasoningEffort && modelConfig.reasoningEffort !== "none" && (() => {
+              // Gemini 3.x menggunakan thinkingLevel (string), bukan thinkingBudget (integer)
+              const isGemini3 = chatModel.includes("gemini-3");
+              if (isGemini3) {
+                return {
+                  google: { thinkingConfig: { thinkingLevel: modelConfig.reasoningEffort } },
+                };
+              }
+              // Gemini 2.5 menggunakan thinkingBudget (integer)
+              return {
+                google: { thinkingConfig: { thinkingBudget: modelConfig.reasoningEffort === "high" ? 8000 : 1000 } },
+              };
+            })()),
           },
           tools: {
             getWeather,
@@ -294,15 +301,7 @@ export async function POST(request: Request) {
           });
         }
       },
-      onError: (error) => {
-        if (
-          error instanceof Error &&
-          error.message?.includes(
-            "AI Gateway requires a valid credit card on file to service requests"
-          )
-        ) {
-          return "AI Gateway requires a valid credit card on file to service requests. Please visit https://vercel.com/d?to=%2F%5Bteam%5D%2F%7E%2Fai%3Fmodal%3Dadd-credit-card to add a card and unlock your free credits.";
-        }
+      onError: (_error) => {
         return "Oops, an error occurred!";
       },
     });
@@ -333,15 +332,6 @@ export async function POST(request: Request) {
 
     if (error instanceof ChatbotError) {
       return error.toResponse();
-    }
-
-    if (
-      error instanceof Error &&
-      error.message?.includes(
-        "AI Gateway requires a valid credit card on file to service requests"
-      )
-    ) {
-      return new ChatbotError("bad_request:activate_gateway").toResponse();
     }
 
     console.error("Unhandled error in chat API:", error, { vercelId });
