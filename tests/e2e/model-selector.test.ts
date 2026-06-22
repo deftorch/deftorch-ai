@@ -1,6 +1,6 @@
-import { expect, test } from "@playwright/test";
-
-const MODEL_BUTTON_REGEX = /Kimi|Codestral|Mistral|DeepSeek|GPT|Grok/i;
+import { expect } from "@playwright/test";
+import { test } from "../fixtures";
+import { MODEL_BUTTON_REGEX } from "../constants";
 
 test.describe("Model Selector", () => {
   test.beforeEach(async ({ page }) => {
@@ -33,9 +33,9 @@ test.describe("Model Selector", () => {
     await modelButton.click();
 
     const searchInput = page.getByPlaceholder("Search models...");
-    await searchInput.fill("Mistral");
+    await searchInput.fill("Gemini 3.1");
 
-    await expect(page.getByText("Mistral Small").first()).toBeVisible();
+    await expect(page.getByText("Gemini 3.1 Flash-Lite").first()).toBeVisible();
   });
 
   test("can close model selector by clicking outside", async ({ page }) => {
@@ -59,8 +59,7 @@ test.describe("Model Selector", () => {
       .first();
     await modelButton.click();
 
-    await expect(page.getByText("Mistral")).toBeVisible();
-    await expect(page.getByText("Moonshot")).toBeVisible();
+    await expect(page.getByText(/google/i).first()).toBeVisible();
   });
 
   test("can select a different model", async ({ page }) => {
@@ -70,12 +69,12 @@ test.describe("Model Selector", () => {
       .first();
     await modelButton.click();
 
-    await page.getByText("Mistral Small").first().click();
+    await page.getByText("Gemini 3.1 Flash-Lite").first().click();
 
     await expect(page.getByPlaceholder("Search models...")).not.toBeVisible();
 
     await expect(
-      page.locator("button").filter({ hasText: "Mistral Small" }).first()
+      page.locator("button").filter({ hasText: "Gemini 3.1 Flash-Lite" }).first()
     ).toBeVisible();
   });
 });
