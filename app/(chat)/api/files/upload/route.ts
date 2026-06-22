@@ -25,7 +25,7 @@ const FileSchema = z.object({
     })
     .refine((file) => {
       const allowedExtensions = ['.md', '.csv', '.json', '.xml', '.py', '.js', '.ts', '.html', '.css', '.java', '.cpp', '.c', '.go', '.php', '.sh', '.docx', '.xlsx'];
-      const isExtensionAllowed = allowedExtensions.some(ext => file.name.toLowerCase().endsWith(ext));
+      const isExtensionAllowed = allowedExtensions.some(ext => ((file as File).name || "").toLowerCase().endsWith(ext));
       return ALLOWED_TYPES.includes(file.type) || isExtensionAllowed;
     }, {
       message: "File type is not supported",
