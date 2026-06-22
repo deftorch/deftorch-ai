@@ -1,9 +1,12 @@
-import { type NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
-import { guestRegex, isDevelopmentEnvironment } from "./lib/constants";
+import { NextResponse } from "next/server";
+import NextAuth from "next-auth";
+import { guestRegex } from "./lib/constants";
+import { authConfig } from "./app/(auth)/auth.config";
 
-export async function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+const { auth } = NextAuth(authConfig);
+
+export const proxy = auth(async (req) => {
+  const { pathname } = req.nextUrl;
 
   if (pathname.startsWith("/ping")) {
     return new Response("pong", { status: 200 });
@@ -13,30 +16,25 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const token = await getToken({
-    req: request,
-    secret: process.env.AUTH_SECRET,
-    secureCookie: !isDevelopmentEnvironment,
-  });
-
+  const session = req.auth;
   const base = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
-  if (!token) {
-    const redirectUrl = encodeURIComponent(new URL(request.url).pathname);
+  if (!session) {
+    const redirectUrl = encodeURIComponent(new URL(req.url).pathname);
 
     return NextResponse.redirect(
-      new URL(`${base}/api/auth/guest?redirectUrl=${redirectUrl}`, request.url)
+      new URL(`${base}/api/auth/guest?redirectUrl=${redirectUrl}`, req.url)
     );
   }
 
-  const isGuest = guestRegex.test(token?.email ?? "");
+  const isGuest = guestRegex.test(session.user?.email ?? "");
 
-  if (token && !isGuest && ["/login", "/register"].includes(pathname)) {
-    return NextResponse.redirect(new URL(`${base}/`, request.url));
+  if (session && !isGuest && ["/login", "/register"].includes(pathname)) {
+    return NextResponse.redirect(new URL(`${base}/`, req.url));
   }
 
   return NextResponse.next();
-}
+});
 
 export const config = {
   matcher: [
