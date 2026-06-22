@@ -1,0 +1,22 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Greeting Component > renders greeting texts correctly 1`] = `
+<div>
+  <div
+    class="flex flex-col items-center px-4"
+  >
+    <div
+      class="text-center font-semibold text-2xl tracking-tight text-foreground md:text-3xl"
+      style="opacity: 0; transform: translateY(10px);"
+    >
+      What can I help with?
+    </div>
+    <div
+      class="mt-3 text-center text-muted-foreground/80 text-sm"
+      style="opacity: 0; transform: translateY(10px);"
+    >
+      Ask a question, write code, or explore ideas.
+    </div>
+  </div>
+</div>
+`;

@@ -11,7 +11,9 @@ export default defineConfig({
     include: [
       "tests/unit/**/*.test.ts", 
       "tests/unit/**/*.test.tsx", 
-      "tests/components/**/*.test.tsx"
+      "tests/components/**/*.test.tsx",
+      "tests/integration/**/*.test.ts",
+      "tests/api/**/*.test.ts"
     ],
   },
   resolve: {
