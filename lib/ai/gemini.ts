@@ -34,9 +34,7 @@ export function getAutoRotateGeminiModel(modelId: string) {
   const google = createGoogleGenerativeAI({ apiKey });
   // Remove "google/" prefix if exists because ai-sdk/google expects just "gemini-1.5-pro"
   const actualModelId = modelId.startsWith("google/") ? modelId.replace("google/", "") : modelId;
-  return google(actualModelId, {
-    useSearchGrounding: true, // Fitur Web Search Otomatis (Grounding)
-  });
+  return google(actualModelId);
 }
 
 export async function fetchGeminiModels() {
