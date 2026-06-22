@@ -34,7 +34,7 @@ export async function POST(request: Request) {
             totalChunks: chunks.length,
           },
           content: chunk,
-          embedding: `[${embedding.join(",")}]`, // Format pgvector
+          embedding, // Format pgvector (array of numbers, Drizzle toDriver handles stringification)
         };
       })
     );
